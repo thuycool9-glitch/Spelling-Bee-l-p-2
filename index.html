@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spelling Bee – The Super Spelling Challenge</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:"Comic Sans MS","Trebuchet MS",Arial,sans-serif;background:linear-gradient(#fff6bf,#d6efff 60%,#e3f9e5);color:#24506b;text-align:center}
+.scr{display:none;max-width:800px;margin:auto;padding:14px}.scr.on{display:block}
+h1{font-size:clamp(34px,8vw,64px);margin:4px;color:#f6a000;text-shadow:3px 3px #fff}
+.card{background:#fff;border-radius:28px;padding:16px;box-shadow:0 8px 0 #ffd466,0 12px 24px #0002;margin:10px 0;position:relative}
+.btn{font:inherit;font-weight:700;font-size:clamp(16px,4.5vw,22px);border:0;border-radius:40px;padding:12px 26px;margin:5px;background:#ffb300;color:#fff;box-shadow:0 5px 0 #c27f00;cursor:pointer}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0}.btn:disabled{opacity:.45;cursor:default}.bl{background:#3aa7e8;box-shadow:0 5px 0 #1b6fa0}.or{background:#ff8a3d;box-shadow:0 5px 0 #c2501a}.gr{background:#43c06a;box-shadow:0 5px 0 #25803c}
+input{font:inherit;font-size:26px;padding:12px;border-radius:20px;border:4px solid #3aa7e8;text-align:center;width:min(360px,92%);margin:8px}
+.bee{font-size:110px;display:inline-block;animation:fl 2s ease-in-out infinite}.pic{font-size:clamp(90px,24vw,140px);line-height:1.1;animation:fl 3s ease-in-out infinite;min-height:130px}
+@keyframes fl{50%{transform:translateY(-10px) rotate(4deg)}}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.opt,.tile{font:inherit;font-weight:700;font-size:clamp(20px,6vw,30px);padding:14px 6px;border-radius:22px;border:4px solid #3aa7e8;background:#eaf6ff;color:#1b4965;cursor:pointer}
+.opt.sel{background:#ffe9a8;border-color:#ffb300}.opt:disabled,.tile:disabled{cursor:default}.good{background:#9be8a8!important;border-color:#25803c!important}.bad{background:#ffb8a0!important;border-color:#e0501a!important}
+.tiles{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.tile{min-width:56px}
+.pat{font-size:clamp(30px,9vw,52px);letter-spacing:6px;font-weight:700;color:#ff8a3d;min-height:56px;margin:6px}
+.pb{background:#fff;border-radius:10px;border:3px solid #fff;overflow:hidden}#bar{height:16px;background:#ffb300;width:0;border-radius:10px;transition:width .4s}
+.hd{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;font-weight:700;margin:6px 0}
+.yes{font-size:34px;font-weight:700;color:#25a244;animation:fl .6s 2}.no{font-size:30px;font-weight:700;color:#e5632d}
+.shake{animation:sk .4s}@keyframes sk{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+.dance{animation:dn .5s 3}@keyframes dn{50%{transform:translateY(-20px) rotate(-15deg) scale(1.2)}}
+.cf{position:fixed;top:-10%;font-size:28px;pointer-events:none;animation:fall linear forwards;z-index:9}@keyframes fall{to{top:105%;transform:rotate(540deg)}}
+.ltr{display:inline-block;font-size:34px;font-weight:700;margin:3px;color:#fff;background:#ffb300;border-radius:12px;width:46px;line-height:46px;animation:fl 2.5s ease-in-out infinite}
+.sm{font-size:15px;color:#567}table{margin:auto;border-collapse:collapse}td{padding:6px 14px;border-bottom:2px dashed #ffe9a8}
+</style></head><body>
+
+<section id="hm" class="scr on"><div class="card">
+<div id="lt"></div><div class="bee">🐝</div><h1>SPELLING BEE</h1><h2 style="margin:0;color:#3aa7e8">The Super Spelling Challenge</h2>
+<p style="font-size:22px"><b>70 Questions · 7 Rounds · 700 Points</b></p>
+<button class="btn gr" onclick="start()">▶ START GAME</button>
+<button class="btn bl" onclick="$('#how').style.display=$('#how').style.display=='block'?'none':'block'">❓ HOW TO PLAY</button><br>
+<button class="btn or" id="sb" onclick="tog()">🔊 SOUND ON</button><button class="btn or" id="tb" onclick="tmt()">⏱ TIMER OFF</button><button class="btn bl" onclick="fs()">⛶ FULLSCREEN</button>
+<div id="how" style="display:none;text-align:left;font-size:18px;background:#fffbe6;border-radius:18px;padding:12px;margin-top:10px">
+<b>How to play</b><br>1. Look at the picture and think about the word.<br>2. Choose, build, listen or type your answer.<br>3. Press <b>CHECK ANSWER</b>, then <b>NEXT QUESTION</b>.<br>4. Each correct answer gives <b>10 points</b>. Try your best, Bee Champion! 🐝<br>
+<span class="sm">Rounds: Look and Spell · Missing Letters · Unscramble · Listen and Spell · Correct Spelling · Type the Word · Spelling Bee Challenge</span></div>
+</div></section>
+
+<section id="gm" class="scr">
+<div class="hd"><span id="rn"></span><span id="qn"></span><span id="tm"></span></div>
+<div class="pb"><div id="bar"></div></div>
+<div class="hd"><span id="st"></span><span><button class="btn sndb" style="padding:4px 12px;font-size:16px" onclick="tog()">🔊</button><button class="btn" style="padding:4px 12px;font-size:16px" onclick="fs()">⛶</button></span></div>
+<div class="card" id="card"><div style="position:absolute;left:8px;top:4px;font-size:42px" id="bee">🐝</div>
+<div id="pr" style="font-size:clamp(20px,5vw,28px);font-weight:700;color:#3aa7e8"></div>
+<div class="pic" id="pic"></div><div id="vn" style="font-size:26px;font-weight:700;color:#ff8a3d"></div>
+<div id="ans"></div><div id="fb" style="min-height:70px"></div>
+<button class="btn gr" id="ck" onclick="chk()">CHECK ANSWER</button><button class="btn or" id="nx" style="display:none" onclick="nxt()">NEXT QUESTION ➡</button></div></section>
+
+<section id="fn" class="scr"><div class="card"><div class="bee" style="font-size:90px">🐝🏅</div><h1 id="fr"></h1><h2 id="fs" style="color:#3aa7e8"></h2>
+<p id="fd" style="font-size:20px"></p><table id="ft"></table><p style="font-size:22px"><b>You are amazing! Keep learning and keep shining!</b></p>
+<button class="btn gr" onclick="start()">🔄 PLAY AGAIN</button><button class="btn or" onclick="rev()">📝 REVIEW WRONG ANSWERS</button><button class="btn bl" onclick="home()">🏠 BACK TO HOME</button></div></section>
+
+<section id="rv" class="scr"><div class="card"><h2>📝 Review Wrong Answers</h2><div id="rl"></div><button class="btn" onclick="go('fn')">⬅ BACK</button></div></section>
+
+<script>
+const W=[['book','📖'],['pen','🖊️'],['pencil','✏️'],['ruler','📏'],['bag','🎒'],['chair','🪑'],['teacher','🧑‍🏫'],['student','🧑‍🎓'],['school','🏫'],['notebook','📓'],['crayon','🖍️'],['computer','💻'],['door','🚪'],['window','🪟'],['picture','🖼️'],['clock','⏰'],
+['football','⚽'],['basketball','🏀'],['volleyball','🏐'],['tennis','🎾'],['badminton','🏸'],['swimming','🏊'],['running','🏃'],['skating','⛸️'],['cycling','🚴'],['dancing','💃'],['singing','🎤'],['fishing','🎣'],['baseball','⚾'],['hockey','🏒'],['music','🎵'],
+['car','🚗'],['bus','🚌'],['bike','🚲'],['train','🚆'],['plane','✈️'],['boat','⛵'],['ship','🚢'],['helicopter','🚁'],['motorbike','🏍️'],['truck','🚚'],['taxi','🚕'],['teddy bear','🧸'],['kite','🪁'],['robot','🤖'],['puzzle','🧩'],['skateboard','🛹'],['scooter','🛴'],['computer game','🎮']];
+const VN={notebook:'quyển vở',computer:'máy tính',ruler:'thước kẻ',basketball:'bóng rổ',volleyball:'bóng chuyền',badminton:'cầu lông',helicopter:'máy bay trực thăng',motorbike:'xe máy','teddy bear':'gấu bông',skateboard:'ván trượt'};
+const RD=[{n:'LOOK AND SPELL',k:'c4',l:[2,3,9,11,16,17,19,34,38,43]},{n:'MISSING LETTERS',k:'m',l:[0,5,8,20,21,25,29,31,33,36]},{n:'UNSCRAMBLE THE WORD',k:'s',l:[1,4,10,15,28,22,30,32,35,40]},
+{n:'LISTEN AND SPELL',k:'l',l:[6,7,12,23,24,27,37,41,44,47]},{n:'CHOOSE THE CORRECT SPELLING',k:'c3',l:[13,14,8,26,18,29,27,39,42,45]},{n:'TYPE THE WORD',k:'t',l:[4,13,14,6,19,24,26,32,46,48]},{n:'SPELLING BEE CHALLENGE',k:'v',l:[9,11,3,17,18,20,38,39,42,46]}];
+const $=s=>document.querySelector(s),AZ='abcdefghijklmnopqrstuvwxyz',Wd=i=>W[i][0],E=i=>W[i][1],pk=a=>a[Math.random()*a.length|0],norm=s=>s.toLowerCase().replace(/[\s-]+/g,'');
+const sh=a=>{a=[...a];for(let i=a.length;i>1;){const j=Math.random()*i--|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+let Q,n,sc,ok,ko,rs,wr,locked,cur,pick,pn,sfx=1,tmOn=0,t0,tmr,ac;
+function mis(w){const s=new Set();let t=0;while(s.size<3&&t++<300){const a=[...w],p=a.map((c,i)=>/[a-z]/.test(c)?i:-1).filter(i=>i>=0),i=pk(p),o=Math.random()*4|0;
+if(o==0&&/[a-z]/.test(a[i+1]||''))[a[i],a[i+1]]=[a[i+1],a[i]];else if(o==1)a[i]=pk([...AZ]);else if(o==2)a.splice(i,1);else a.splice(i,0,a[i]);
+const m=a.join('');if(m!==w&&m.length>1)s.add(m)}return[...s]}
+function mk(){const Q=[];RD.forEach((R,r)=>sh(R.l).forEach(i=>{const w=Wd(i),b={r,w,e:E(i),k:'t',a:w};
+if(R.k=='c4'||R.k=='c3'){b.k='c';b.p=R.k=='c4'?'Look at the picture. Choose the correct spelling.':'Which spelling is correct?';b.o=sh([w,...mis(w).slice(0,2)])}
+if(R.k=='m'){b.k='m';const p=1+Math.random()*(w.length-1)|0,L=w[p];b.p='Which letter is missing?';b.show=[...w].map((c,k)=>k==p?'_':c).join(' ').toUpperCase();b.o=sh([L,...sh([...AZ]).filter(x=>x!=L).slice(0,2)]).map(x=>x.toUpperCase());b.a=L.toUpperCase()}
+if(R.k=='s'){b.k='s';b.p='Unscramble the letters to make a word.';let l;do l=sh([...w]);while(l.join('')==w);b.l=l}
+if(R.k=='l'){b.k='l';b.hide=1;b.p='Listen and type the word.'}
+if(R.k=='t')b.p='Look at the picture. Type the word.';
+if(R.k=='v'){b.p='Look and read. Write the English word.';b.vn=VN[w]}
+Q.push(b)}));return Q}
+function go(id){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));$('#'+id).classList.add('on');scrollTo(0,0)}
+function home(){clearInterval(tmr);go('hm')}
+function start(){Q=mk();n=sc=ok=ko=0;rs=[0,0,0,0,0,0,0];wr=[];t0=Date.now();clearInterval(tmr);tmr=setInterval(tick,500);go('gm');show()}
+function tick(){const s=(Date.now()-t0)/1000|0;$('#tm').textContent=tmOn?`⏱ ${s/60|0}:${String(s%60).padStart(2,'0')}`:''}
+function tmt(){tmOn=!tmOn;$('#tb').textContent=tmOn?'⏱ TIMER ON':'⏱ TIMER OFF';tick()}
+function upd(){$('#st').textContent=`⭐ ${sc}/700   ✅ ${ok}   ❌ ${ko}   Done: ${n+(locked?1:0)}/70`}
+function show(){const q=Q[n];cur='';locked=0;pick=[];
+$('#rn').textContent=`Round ${q.r+1}: ${RD[q.r].n}`;$('#qn').textContent=`Question ${n+1}/70`;$('#bar').style.width=n/70*100+'%';upd();
+$('#pr').textContent=q.p;$('#fb').innerHTML='';$('#ck').style.display='inline-block';$('#ck').disabled=true;$('#nx').style.display='none';$('#card').className='card';
+$('#pic').textContent=q.hide?'🎧':q.e;$('#vn').textContent=q.vn||'';let h='';
+if(q.k=='c')h='<div class="grid">'+q.o.map((v,i)=>`<button class="opt" data-v="${v}">${'ABCD'[i]}. ${v}</button>`).join('')+'</div>';
+if(q.k=='m')h=`<div class="pat">${q.show}</div><div class="grid">`+q.o.map(v=>`<button class="opt" data-v="${v}">${v}</button>`).join('')+'</div>';
+if(q.k=='s')h=`<div class="pat" id="sl"></div><div class="tiles">${q.l.map((c,k)=>`<button class="tile" data-k="${k}">${c.toUpperCase()}</button>`).join('')}</div><button class="btn or" id="clr">↺ CLEAR</button>`;
+if(q.k=='l')h='<button class="btn bl" id="lis">🔊 LISTEN AGAIN</button><button class="btn" id="hnt">💡 HINT</button><div id="hn" class="sm"></div>';
+if(q.k=='l'||q.k=='t'||q.k=='v')h+='<div><input id="ti" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type here..."></div>';
+$('#ans').innerHTML=h;if(q.k=='s')sl();
+if(q.k=='l'){setTimeout(()=>say(q.w),400);$('#lis').onclick=()=>say(q.w);
+$('#hnt').onclick=()=>{$('#pic').textContent=q.e;$('#hnt').disabled=true};
+if(!('speechSynthesis'in window)){$('#hn').textContent='⚠️ Speech is not supported. Hint: '+q.w.toUpperCase();$('#pic').textContent=q.e}}
+const ti=$('#ti');if(ti){ti.oninput=()=>{cur=ti.value;$('#ck').disabled=!cur.trim()};ti.onkeydown=e=>{if(e.key=='Enter')chk()};ti.focus()}}
+function sl(){const q=Q[n],s=pick.map(k=>q.l[k].toUpperCase());while(s.length<q.l.length)s.push('_');$('#sl').textContent=s.join(' ')}
+$('#ans').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||locked)return;const q=Q[n];
+if(b.classList.contains('opt')){document.querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));b.classList.add('sel');cur=b.dataset.v;$('#ck').disabled=false}
+else if(b.classList.contains('tile')){pick.push(+b.dataset.k);b.disabled=true;sl();cur=pick.length==q.l.length?pick.map(k=>q.l[k]).join(''):'';$('#ck').disabled=!cur}
+else if(b.id=='clr'){pick=[];cur='';document.querySelectorAll('.tile').forEach(t=>t.disabled=false);sl();$('#ck').disabled=true}});
+function chk(){if(locked||!cur.trim())return;locked=1;const q=Q[n],g=norm(cur)==norm(q.a),f=$('#fb');
+document.querySelectorAll('.opt').forEach(b=>{b.disabled=true;if(b.dataset.v===q.a)b.classList.add('good');else if(b.classList.contains('sel'))b.classList.add('bad')});
+document.querySelectorAll('.tile,#clr,#ti,#hnt').forEach(b=>b.disabled=true);$('#ck').style.display='none';$('#pic').textContent=q.e;
+if(g){sc+=10;ok++;rs[q.r]+=10;f.innerHTML=`<div class="yes">${pk(['EXCELLENT!','GREAT JOB!','FANTASTIC!'])} +10</div><div style="font-size:22px">${q.w.toUpperCase()} ${q.e}</div>`;
+$('#bee').classList.remove('dance');void $('#bee').offsetWidth;$('#bee').classList.add('dance');snd([523,659,784,1047],.13)}
+else{ko++;wr.push({w:q.w,e:q.e,r:q.r});f.innerHTML=`<div class="no">TRY AGAIN!</div><div style="font-size:22px">Correct answer: <b>${q.w.toUpperCase()}</b> ${q.e}</div>`;$('#card').classList.add('shake');snd([330,262],.2)}
+upd();$('#nx').textContent=n==69?'FINISH 🏆':'NEXT QUESTION ➡';$('#nx').style.display='inline-block'}
+function nxt(){if(n==69)fin();else{n++;show()}}
+function fin(){clearInterval(tmr);go('fn');$('#bar').style.width='100%';const R=sc>=630?'GOLD SPELLING BEE 🥇':sc>=560?'SUPER SPELLER 🥈':sc>=420?'GREAT SPELLER 🥉':'KEEP PRACTISING! 🌟';
+$('#fr').textContent=R;$('#fs').textContent=`TOTAL SCORE: ${sc} / 700`;
+$('#fd').innerHTML=`✅ CORRECT ANSWERS: <b>${ok}</b> &nbsp; ❌ WRONG ANSWERS: <b>${ko}</b><br>🎯 ACCURACY: <b>${Math.round(ok/70*100)}%</b> &nbsp; 📋 COMPLETED: <b>${ok+ko}/70</b>`;
+$('#ft').innerHTML=RD.map((r,i)=>`<tr><td>Round ${i+1}</td><td>${r.n}</td><td><b>${rs[i]}/100</b></td></tr>`).join('');conf();snd([523,659,784,1047,784,1047,1319],.15)}
+function rev(){go('rv');$('#rl').innerHTML=wr.length?wr.map(x=>`<div style="font-size:24px;margin:8px">${x.e} <b>${x.w.toUpperCase()}</b> <span class="sm">(Round ${x.r+1})</span></div>`).join(''):'<h2>🎉 No wrong answers! Perfect!</h2>'}
+function conf(){for(let i=0;i<40;i++){const s=document.createElement('span');s.className='cf';s.textContent=pk(['⭐','🎉','✨','🎊','🌟']);s.style.left=Math.random()*95+'%';s.style.animationDuration=1.5+Math.random()*1.8+'s';document.body.appendChild(s);setTimeout(()=>s.remove(),3500)}}
+function say(t){if(!('speechSynthesis'in window))return;const u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=.7;u.pitch=1.1;const v=speechSynthesis.getVoices().find(v=>v.lang=='en-US'||v.lang=='en-GB');if(v)u.voice=v;speechSynthesis.cancel();speechSynthesis.speak(u)}
+function tone(f,t,d){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;o.type='triangle';g.gain.setValueAtTime(.15,ac.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+t+d);o.connect(g);g.connect(ac.destination);o.start(ac.currentTime+t);o.stop(ac.currentTime+t+d)}catch(e){}}
+function snd(a,d){if(sfx)a.forEach((f,i)=>tone(f,i*d,d*1.5))}
+function tog(){sfx=!sfx;$('#sb').textContent=sfx?'🔊 SOUND ON':'🔇 SOUND OFF';document.querySelectorAll('.sndb').forEach(b=>b.textContent=sfx?'🔊':'🔇')}
+function fs(){const d=document,e=d.documentElement;if(d.fullscreenElement)d.exitFullscreen();else if(e.requestFullscreen)e.requestFullscreen().catch(()=>{})}
+$('#lt').innerHTML=[...'SPELLING'].map((c,i)=>`<span class="ltr" style="animation-delay:${i*.2}s;background:${['#ffb300','#3aa7e8','#ff8a3d','#43c06a'][i%4]}">${c}</span>`).join('');
+</script></body></html>
